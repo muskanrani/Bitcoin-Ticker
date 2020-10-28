@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'coin_data.dart';
+import 'dart:io' show Platform;
 class PriceScreen extends StatefulWidget {
   @override
   _PriceScreenState createState() => _PriceScreenState();
@@ -8,14 +10,40 @@ class PriceScreen extends StatefulWidget {
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = 'USD';
 
-  List<DropdownMenuItem> getDropDownItems(){
+  DropdownButton<String> androidDropdownButton(){
+
     List<DropdownMenuItem<String>> dropDownItems = [];
     for(String currency in currenciesList){
       var newItem = DropdownMenuItem(child: Text(currency), value: currency,);
       dropDownItems.add(newItem);
     }
-    return dropDownItems;
+
+    return DropdownButton<String>(
+              value: selectedCurrency,
+              items: dropDownItems,
+              onChanged: (value){
+              setState(() {
+              selectedCurrency = value;
+              });
+              },);
   }
+
+  CupertinoPicker iosPicker(){
+      List<Text> pickerItem = [];
+      for (String currency in currenciesList) {
+        pickerItem.add(Text(currency));
+    }
+
+   return CupertinoPicker(
+      backgroundColor: Colors.lightBlue,
+      itemExtent: 32.0,
+      onSelectedItemChanged: (selectedIndex){
+        print(selectedIndex);
+      }, children:pickerItem);
+
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,17 +80,13 @@ class _PriceScreenState extends State<PriceScreen> {
             alignment: Alignment.center,
             padding: EdgeInsets.only(bottom: 30.0),
             color: Colors.lightBlue,
-            child: DropdownButton<String>(
-              value: selectedCurrency,
-              items: getDropDownItems(),
-              onChanged: (value){
-                setState(() {
-                  selectedCurrency = value;
-                });
-            },),
+            child:Platform.isIOS ? iosPicker() : androidDropdownButton(),
           ),
         ],
       ),
     );
   }
 }
+
+
+
