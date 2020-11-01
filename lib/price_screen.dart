@@ -10,6 +10,7 @@ class PriceScreen extends StatefulWidget {
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = 'USD';
 
+
   DropdownButton<String> androidDropdownButton(){
 
     List<DropdownMenuItem<String>> dropDownItems = [];
@@ -19,11 +20,13 @@ class _PriceScreenState extends State<PriceScreen> {
     }
 
     return DropdownButton<String>(
+              dropdownColor: Colors.lightBlue,
               value: selectedCurrency,
               items: dropDownItems,
               onChanged: (value){
               setState(() {
               selectedCurrency = value;
+              getData();
               });
               },);
   }
@@ -38,12 +41,34 @@ class _PriceScreenState extends State<PriceScreen> {
       backgroundColor: Colors.lightBlue,
       itemExtent: 32.0,
       onSelectedItemChanged: (selectedIndex){
-        print(selectedIndex);
+        setState(() {
+          //1: Save the selected currency to the property selectedCurrency
+          selectedCurrency = currenciesList[selectedIndex];
+          //2: Call getData() when the picker/dropdown changes.
+          getData();
+        });
       }, children:pickerItem);
 
   }
 
+  String bitcoinValue = '?';
 
+  void getData() async {
+    try {
+      double data = await CoinData().getCoinData(selectedCurrency);
+      //13. We can't await in a setState(). So you have to separate it out into two steps.
+      setState(() {
+        bitcoinValue = data.toStringAsFixed(0);
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+@override
+  void initState() {
+    super.initState();
+    getData();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,7 +90,7 @@ class _PriceScreenState extends State<PriceScreen> {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
                 child: Text(
-                  '1 BTC = ? USD',
+                  '1 BTC = $bitcoinValue $selectedCurrency',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20.0,
